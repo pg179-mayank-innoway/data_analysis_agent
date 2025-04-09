@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Upload Excel File</title>
+    <script>
+        function showQASection() {
+            document.getElementById('qa-section').style.display = 'block';
+        }
+
+        function askQuestion() {
+            const question = document.getElementById('question').value;
+            fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'question=' + encodeURIComponent(question)
+            })
+            .then(response => response.text())
+            .then(answer => {
+                document.getElementById('answer').textContent = answer;
+            });
+        }
+
+        // ✅ FIXED: Call showQASection if template variable passed is true
+        window.onload = function () {
+            const uploaded = "{{ uploaded|default(false)|string }}";
+            if (uploaded === "True") {
+                showQASection();
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <h1>Upload Excel File (.xls or .xlsx)</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- File Upload Form -->
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".xls,.xlsx">
+        <input type="submit" value="Upload">
+    </form>
+
+    <!-- Question-Answer Section (initially hidden) -->
+    <div id="qa-section" style="display: none; margin-top: 20px;">
+        <textarea id="question" rows="4" cols="50" placeholder="Ask a question about the Excel file..."></textarea><br>
+        <button type="button" onclick="askQuestion()">Generate</button>
+        <p><strong>Answer:</strong> <span id="answer"></span></p>
+    </div>
+
+</body>
+</html>
+
